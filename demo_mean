@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographic: Understanding Mean, Variance, & Standard Deviation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <!--
+    Narrative & Structure Plan:
+    1. Introduction: Hook the user with the problem of understanding large datasets.
+    2. The Mean: Introduce the concept of a central point. Visualize individual scores against the mean using a Bar Chart.
+    3. The Variance: Explain the concept of spread. Visualize the squared deviations from the mean using another Bar Chart to show their magnitude.
+    4. The Standard Deviation: Make the concept of spread intuitive. Use a big number display and a visual representation of the standard deviation range on the original bar chart.
+    5. The Process: Show how the concepts build on each other using a flowchart made with HTML/CSS.
+    6. The Easy Way: Conclude with a practical Python code example for real-world application.
+    7. Gemini Features: Added interactive explanations and custom data analysis powered by the Gemini API.
+
+    Visualization Choices (NO SVG, NO Mermaid JS Confirmed):
+    - Market Size (Big Number): Goal: Inform. Tool: Styled HTML text. Justification: Directly conveys a key metric.
+    - Market Share (Bar Chart): Goal: Compare. Tool: Chart.js (Canvas). Justification: Ideal for comparing discrete categories (scores).
+    - Growth Projections (Bar Chart): Goal: Compare. Tool: Chart.js (Canvas). Justification: Shows magnitude of squared differences effectively.
+    - Key Player Positioning (Big Number): Goal: Inform. Tool: Styled HTML. Justification: Highlights the final, intuitive result (Std Dev).
+    - Process Flow (Flow Chart): Goal: Organize. Tool: HTML/CSS with Tailwind. Justification: Clearly shows a sequence of steps without using prohibited libraries.
+    - Python Code (Code Block): Goal: Inform. Tool: Styled HTML. Justification: Presents code in a readable, conventional format.
+
+    Color Palette Chosen: "Brilliant Blues" (#003f5c, #2f4b7c, #665191, #a05195, #d45087, #f95d6a, #ff7c43, #ffa600)
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flow-arrow {
+            color: #a05195;
+            font-size: 2rem;
+            line-height: 1;
+        }
+        .gemini-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .gemini-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(249, 93, 106, 0.5);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #f95d6a;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-[#003f5c]">Data's Story</h1>
+            <p class="text-xl md:text-2xl text-[#2f4b7c] mt-2">From Center to Spread: Understanding Mean, Variance, & Standard Deviation</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <div class="md:col-span-2 lg:col-span-3 bg-white rounded-lg shadow-lg p-6 flex flex-col md:flex-row items-center justify-around text-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-lg text-[#665191]">The Challenge</p>
+                    <p class="text-5xl font-bold text-[#003f5c]">100s of Scores</p>
+                    <p class="text-md text-gray-500">How do we make sense of it all?</p>
+                </div>
+                <div class="text-4xl font-thin text-gray-300 hidden md:block">&rarr;</div>
+                 <div class="mb-4 md:mb-0">
+                    <p class="text-lg text-[#665191]">The Solution</p>
+                    <p class="text-5xl font-bold text-[#003f5c]">2 Key Questions</p>
+                    <p class="text-md text-gray-500">1. Where's the center? 2. How spread out is it?</p>
+                </div>
+                 <div class="text-4xl font-thin text-gray-300 hidden md:block">&rarr;</div>
+                <div>
+                    <p class="text-lg text-[#665191]">Our Dataset</p>
+                    <p class="text-5xl font-bold text-[#003f5c]">5 Simple Scores</p>
+                    <p class="text-md text-gray-500">[8, 9, 7, 5, 10]</p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-start">
+                    <h2 class="text-2xl font-bold text-[#2f4b7c] mb-2">Part 1: Finding the Center - The Mean</h2>
+                    <button class="gemini-button text-sm bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-1 px-3 rounded-full" onclick="getExplanation('Mean')">✨ Explain it Simply</button>
+                </div>
+                <p class="text-gray-600 mb-4">The mean, or average, gives us a single value to represent the "typical" score. We calculate it by summing all scores and dividing by the count of scores. For our dataset, the mean is 7.8, shown by the dashed line.</p>
+                <div class="chart-container">
+                    <canvas id="meanChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-center">
+                <h2 class="text-2xl font-bold text-[#2f4b7c] mb-2">The Mean Formula</h2>
+                <p class="text-gray-600 mb-4">The formula adds every value ($$x_i$$) and divides by the number of values ($$n$$).</p>
+                <div class="bg-gray-100 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-mono text-[#003f5c]">$$ \mu = \frac{\sum x_i}{n} $$</p>
+                </div>
+                 <div class="mt-4 text-center">
+                    <p class="text-lg text-[#665191]">Our Calculation</p>
+                    <p class="text-3xl font-bold text-[#003f5c]">39 / 5 = 7.8</p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-start">
+                    <h2 class="text-2xl font-bold text-[#a05195] mb-2">Part 2: Measuring the Spread - Variance</h2>
+                    <button class="gemini-button text-sm bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-1 px-3 rounded-full" onclick="getExplanation('Variance')">✨ Explain it Simply</button>
+                </div>
+                <p class="text-gray-600 mb-4">Variance measures how scattered the scores are around the mean. We find the distance of each score from the mean, square it, and then find the average of those squared distances. Notice how scores further from the mean (like 5 and 10) contribute much more to the total variance.</p>
+                <div class="chart-container">
+                    <canvas id="varianceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-center">
+                 <h2 class="text-2xl font-bold text-[#a05195] mb-2">The Variance Formula</h2>
+                <p class="text-gray-600 mb-4">It's the average of the squared distances from the Mean ($$\mu$$).</p>
+                <div class="bg-gray-100 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-mono text-[#665191]">$$ \sigma^2 = \frac{\sum (x_i - \mu)^2}{n} $$</p>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-lg text-[#d45087]">Our Variance</p>
+                    <p class="text-3xl font-bold text-[#a05195]">2.96</p>
+                    <p class="text-sm text-gray-500">(in squared points)</p>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 lg:col-span-3 bg-white rounded-lg shadow-lg p-6 text-center">
+                <div class="flex justify-between items-center mb-4">
+                    <div></div>
+                    <h2 class="text-2xl font-bold text-[#f95d6a]">Part 3: Standard Deviation</h2>
+                    <button class="gemini-button text-sm bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold py-1 px-3 rounded-full" onclick="getExplanation('Standard Deviation')">✨ Explain it Simply</button>
+                </div>
+                <p class="text-gray-600 mb-4 max-w-3xl mx-auto">The variance (2.96) is in "squared points", which is not intuitive. By taking its square root, we get the Standard Deviation. This value is back in the original units (points) and represents the typical distance of any given score from the mean.</p>
+                <div class="flex items-center justify-center space-x-8">
+                     <div>
+                        <p class="text-lg text-[#ff7c43]">The Formula</p>
+                        <p class="text-5xl font-mono text-[#d45087]">$$ \sigma = \sqrt{\sigma^2} $$</p>
+                    </div>
+                    <div>
+                        <p class="text-lg text-[#ff7c43]">The Result</p>
+                        <p class="text-7xl font-black text-[#f95d6a]">1.72</p>
+                        <p class="text-md text-gray-500">A typical score is 1.72 points away from the mean of 7.8.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-[#003f5c] text-center mb-6">The Calculation Journey: From Scores to Spread</h2>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                    <div class="p-4 bg-gray-50 rounded-lg border-2 border-[#ffa600]">
+                        <p class="font-bold text-[#ffa600]">Scores</p>
+                        <p class="text-sm">[8, 9, 7, 5, 10]</p>
+                    </div>
+                    <div class="flow-arrow">&darr;</div>
+                    <div class="p-4 bg-gray-50 rounded-lg border-2 border-[#ff7c43]">
+                        <p class="font-bold text-[#ff7c43]">Calculate Mean</p>
+                        <p class="text-sm">Sum / Count &rarr; 7.8</p>
+                    </div>
+                    <div class="flow-arrow">&darr;</div>
+                     <div class="p-4 bg-gray-50 rounded-lg border-2 border-[#f95d6a]">
+                        <p class="font-bold text-[#f95d6a]">Find Deviations</p>
+                        <p class="text-sm">(Score - Mean)²</p>
+                    </div>
+                    <div class="flow-arrow">&darr;</div>
+                    <div class="p-4 bg-gray-50 rounded-lg border-2 border-[#d45087]">
+                        <p class="font-bold text-[#d45087]">Calculate Variance</p>
+                        <p class="text-sm">Average of Deviations &rarr; 2.96</p>
+                    </div>
+                     <div class="flow-arrow">&darr;</div>
+                    <div class="p-4 bg-gray-50 rounded-lg border-2 border-[#a05195]">
+                        <p class="font-bold text-[#a05195]">Get Standard Deviation</p>
+                        <p class="text-sm">&radic;Variance &rarr; 1.72</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 lg:col-span-3 bg-gradient-to-br from-[#003f5c] to-[#2f4b7c] text-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-center mb-4">✨ Analyze Your Own Data</h2>
+                <p class="text-center text-gray-300 mb-4">Enter your own numbers (comma-separated) to see the stats and get an instant AI-powered analysis!</p>
+                <div class="max-w-xl mx-auto">
+                    <textarea id="customData" class="w-full h-24 p-2 rounded-lg text-gray-800" placeholder="e.g., 23, 45, 67, 12, 88, 54, 32"></textarea>
+                    <div class="flex flex-col md:flex-row items-center justify-between mt-4">
+                        <button id="analyzeDataBtn" class="gemini-button w-full md:w-auto bg-gradient-to-r from-[#f95d6a] to-[#ffa600] text-white font-bold py-2 px-6 rounded-full mb-4 md:mb-0">Get AI Insights ✨</button>
+                        <div id="customStats" class="text-center md:text-right">
+                             <p>Mean: <span id="customMean" class="font-bold">--</span></p>
+                             <p>Std Dev: <span id="customStdDev" class="font-bold">--</span></p>
+                        </div>
+                    </div>
+                    <div id="aiAnalysisResult" class="mt-4 p-4 bg-white/10 rounded-lg min-h-[50px]">
+                        <p class="text-gray-300">Your AI analysis will appear here...</p>
+                    </div>
+                </div>
+            </div>
+
+             <div class="md:col-span-2 lg:col-span-3 bg-[#003f5c] text-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-center mb-4">The Easy Way with Python</h2>
+                <p class="text-center text-gray-300 mb-4">In practice, you'll use libraries like NumPy to do these calculations in an instant.</p>
+                <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                    <pre><code><span class="text-purple-400">import</span> numpy <span class="text-purple-400">as</span> np
+
+scores = [8, 9, 7, 5, 10]
+
+mean = np.mean(scores)         <span class="text-green-400"># 7.8</span>
+variance = np.var(scores)      <span class="text-green-400"># 2.96</span>
+std_dev = np.std(scores)       <span class="text-green-400"># 1.72</span>
+
+print(f"Mean: {mean}, Variance: {variance:.2f}, Std Dev: {std_dev:.2f}")</code></pre>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>Infographic created to visualize core statistical concepts. Enhanced with the Gemini API.</p>
+            <p>Data Source: Example quiz scores. No SVG or Mermaid JS used in this visualization.</p>
+        </footer>
+    </div>
+    
+    <!-- Gemini Explanation Modal -->
+    <div id="explanationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-2xl p-6 max-w-lg w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-2xl font-bold text-[#003f5c]"></h3>
+                <button onclick="closeModal()" class="text-2xl font-bold">&times;</button>
+            </div>
+            <div id="modalContent" class="text-gray-700">
+                <div class="flex items-center justify-center h-32">
+                    <div class="loader"></div>
+                </div>
+            </div>
+            <div class="text-right mt-4">
+                 <button onclick="closeModal()" class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded">Close</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const tooltipTitleCallback = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            } else {
+                              return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        const scores = [8, 9, 7, 5, 10];
+        const labels = ['Student 1', 'Student 2', 'Student 3', 'Student 4', 'Student 5'];
+        const mean = 7.8;
+        const variance = 2.96;
+        const stdDev = 1.72;
+        const squaredDiffs = scores.map(s => Math.pow(s - mean, 2));
+
+        const palette = {
+            blueDark: '#003f5c',
+            blueMid: '#2f4b7c',
+            purpleDark: '#665191',
+            purpleMid: '#a05195',
+            pink: '#d45087',
+            red: '#f95d6a',
+            orange: '#ff7c43',
+            yellow: '#ffa600'
+        };
+
+        new Chart(document.getElementById('meanChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Quiz Score',
+                    data: scores,
+                    backgroundColor: [palette.blueDark, palette.blueMid, palette.purpleDark, palette.purpleMid, palette.pink],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: tooltipTitleCallback.plugins.tooltip,
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                yMin: mean,
+                                yMax: mean,
+                                borderColor: palette.red,
+                                borderWidth: 2,
+                                borderDash: [6, 6],
+                                label: {
+                                    content: `Mean: ${mean}`,
+                                    enabled: true,
+                                    position: 'end',
+                                    backgroundColor: 'rgba(0,0,0,0.6)'
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Score' }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('varianceChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Squared Difference from Mean',
+                    data: squaredDiffs,
+                    backgroundColor: [palette.purpleDark, palette.purpleMid, palette.pink, palette.red, palette.orange],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                   tooltip: tooltipTitleCallback.plugins.tooltip,
+                   legend: {
+                       display: false
+                   }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: '(Score - Mean)²' }
+                    }
+                }
+            }
+        });
+
+        // Gemini API functionality
+        const modal = document.getElementById('explanationModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        const analyzeBtn = document.getElementById('analyzeDataBtn');
+        const customDataInput = document.getElementById('customData');
+        const aiResultDiv = document.getElementById('aiAnalysisResult');
+
+        const apiKey = ""; // Left empty as per instructions
+
+        async function callGemini(prompt) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                   return "Sorry, I couldn't get a response. The API might be busy.";
+                }
+
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                return "An error occurred while contacting the AI. Please check the console for details.";
+            }
+        }
+        
+        async function getExplanation(topic) {
+            modal.classList.remove('hidden');
+            modalTitle.textContent = `Explaining: ${topic}`;
+            modalContent.innerHTML = `<div class="flex items-center justify-center h-32"><div class="loader"></div></div>`;
+            
+            const prompt = `Explain the statistical concept of '${topic}' in a very simple, short paragraph. Use a relatable analogy.`;
+            const explanation = await callGemini(prompt);
+            modalContent.innerHTML = explanation.replace(/\n/g, '<br>');
+        }
+        
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        analyzeBtn.addEventListener('click', async () => {
+            const dataStr = customDataInput.value;
+            if (!dataStr) {
+                aiResultDiv.innerHTML = '<p class="text-yellow-300">Please enter some data first.</p>';
+                return;
+            }
+
+            const dataArr = dataStr.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+            
+            if (dataArr.length < 2) {
+                aiResultDiv.innerHTML = '<p class="text-yellow-300">Please enter at least two valid numbers.</p>';
+                return;
+            }
+
+            const n = dataArr.length;
+            const customMean = dataArr.reduce((a, b) => a + b, 0) / n;
+            const customVariance = dataArr.reduce((acc, val) => acc + Math.pow(val - customMean, 2), 0) / n;
+            const customStdDev = Math.sqrt(customVariance);
+            
+            document.getElementById('customMean').textContent = customMean.toFixed(2);
+            document.getElementById('customStdDev').textContent = customStdDev.toFixed(2);
+
+            aiResultDiv.innerHTML = `<div class="flex items-center justify-center"><div class="loader"></div></div>`;
+            
+            const prompt = `I have a dataset: [${dataArr.join(', ')}]. The mean is ${customMean.toFixed(2)} and the standard deviation is ${customStdDev.toFixed(2)}. In a simple, encouraging, single paragraph, explain what this mean and standard deviation tell me about my specific data. Focus on the concepts of a 'central point' and 'how spread out' the numbers are.`;
+            const analysis = await callGemini(prompt);
+            aiResultDiv.innerHTML = `<p>${analysis.replace(/\n/g, '<br>')}</p>`;
+        });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>
